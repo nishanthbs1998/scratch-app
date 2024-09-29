@@ -2,17 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import Workspace from "./components/Workspace";
 import Sprite from "./components/Sprite";
 function App() {
-
-  const [isOverDropZone, setIsOverDropZone] = useState(false);
-  const [draggedItemId, setDraggedItemId]=useState(null);
+  const [draggedItemId, setDraggedItemId] = useState(null);
   // State to store available sprites
-  const [spriteStore, setSpriteStore] = useState([ 
+  const [spriteStore, setSpriteStore] = useState([
     {
       id: 1,
       name: "sprite_1",
       src: "https://via.placeholder.com/100x100.png?text=Sprite+1",
       currentPosition: { x: 0, y: 0, degree: 0 },
-      motions:[],
+      motions: [],
       isPlaying: false,
     },
   ]);
@@ -20,25 +18,25 @@ function App() {
   const [move, setMove] = useState(0);
   const [rotate, setRotate] = useState(0);
   const [goto, setGoto] = useState({ x: 0, y: 0 });
-  
-  const [repeat, setRepeat] = useState(1);
-  
-  
-const handlePlay=()=>{
-  setSpriteStore((prevStore) => {
-    const updatedStore = prevStore.map((sprite) => {
-      sprite.isPlaying=true;
-      return sprite;
-    });
-    return updatedStore;
-  });
-}
 
-  
- 
-useEffect(() => {
-setCurrentSprite(spriteStore[spriteStore.length-1])
-},[spriteStore.length])
+  const [repeat, setRepeat] = useState(1);
+
+  const handlePlay = () => {
+    setSpriteStore((prevStore) => {
+      const updatedStore = prevStore.map((sprite) => {
+         
+          sprite.isPlaying = !sprite.isPlaying;
+        return sprite;
+      });
+      return updatedStore;
+    });
+  };
+useEffect(()=>{
+  console.log(spriteStore, 'spriteStore')
+}, [spriteStore])
+  useEffect(() => {
+    setCurrentSprite(spriteStore[spriteStore.length - 1]);
+  }, [spriteStore.length]);
 
   const fileInputRef = useRef(null);
   const handleFileUpload = (event) => {
@@ -48,30 +46,34 @@ setCurrentSprite(spriteStore[spriteStore.length-1])
       reader.onloadend = () => {
         setSpriteStore((prevStore) => [
           ...prevStore,
-          { id: Date.now(), name: file.name, src: reader.result, motions:[], currentPosition: { x: 0, y: 0, degree: 0 } },
+          {
+            id: Date.now(),
+            name: file.name,
+            src: reader.result,
+            motions: [],
+            currentPosition: { x: 0, y: 0, degree: 0 },
+          },
         ]);
       };
       reader.readAsDataURL(file);
-      
-
     }
   };
- 
+
   const handleUploadClick = () => {
     fileInputRef.current.click(); // Programmatically click the hidden file input
   };
 
-  const handleDeleteMotion=(id)=>{
+  const handleDeleteMotion = (id) => {
     setSpriteStore((prevStore) => {
       const updatedStore = prevStore.map((sprite) => {
         if (sprite.id === currentSprite.id) {
-          sprite.motions=sprite.motions.filter(motion=>motion.id!==id);
+          sprite.motions = sprite.motions.filter((motion) => motion.id !== id);
         }
         return sprite;
       });
       return updatedStore;
     });
-  }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -79,26 +81,53 @@ setCurrentSprite(spriteStore[spriteStore.length-1])
         Play
       </button>
       <div className="bg-black flex gap-5 h-screen">
-        <div className="bg-blue-400 w-1/2" onDragEnter={() => handleDeleteMotion(draggedItemId)}>
-          <div draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'move', value:move}))}>
+        <div
+          className="bg-blue-400 w-1/2"
+          onDragEnter={() => handleDeleteMotion(draggedItemId)}
+        >
+          <div
+            draggable
+            onDragStart={(e) =>
+              e.dataTransfer.setData(
+                "text/plain",
+                JSON.stringify({ id:Date.now(), type: "move", value: move })
+              )
+            }
+          >
             move x
             <input
               type="text"
               value={move}
               onChange={(e) => setMove(e.target.value)}
             />
-
           </div>
-          <div className="mt-2" draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'rotate', value:rotate}))}>
+          <div
+            className="mt-2"
+            draggable
+            onDragStart={(e) =>
+              e.dataTransfer.setData(
+                "text/plain",
+                JSON.stringify({id:Date.now(), type: "rotate", value: rotate })
+              )
+            }
+          >
             rotate
             <input
               type="text"
               value={rotate}
               onChange={(e) => setRotate(e.target.value)}
             />
-
           </div>
-          <div className="mt-2" draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'goto', value:goto}))}>
+          <div
+            className="mt-2"
+            draggable
+            onDragStart={(e) =>
+              e.dataTransfer.setData(
+                "text/plain",
+                JSON.stringify({id:Date.now(), type: "goto", value: goto })
+              )
+            }
+          >
             goto x
             <input
               className="w-1/12"
@@ -123,30 +152,45 @@ setCurrentSprite(spriteStore[spriteStore.length-1])
                 }))
               }
             />
-
           </div>
-          <div className="mt-2" draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'repeat', value:repeat}))}>
+          <div
+            className="mt-2"
+            draggable
+            onDragStart={(e) =>
+              e.dataTransfer.setData(
+                "text/plain",
+                JSON.stringify({id:Date.now(), type: "repeat", value: repeat })
+              )
+            }
+          >
             repeat
             <input
               type="text"
               value={repeat}
               onChange={(e) => setRepeat(e.target.value)}
             />
-
           </div>
         </div>
 
-        <Workspace setDraggedItemId={setDraggedItemId} isOverDropZone={isOverDropZone} motions={currentSprite?.motions} currentSprite={currentSprite} setSpriteStore={setSpriteStore} />
+        <Workspace
+          setDraggedItemId={setDraggedItemId}
+          motions={currentSprite?.motions}
+          currentSprite={currentSprite}
+          setSpriteStore={setSpriteStore}
+        />
         <div className="flex flex-col w-1/2  h-screen">
           <div className="bg-white relative overflow-hidden h-1/2">
-          {
-          //  console.log(spriteStore)
-            spriteStore?.map((sprite) => (
-              <Sprite key={sprite.id} sprite={sprite} spriteStore={spriteStore} setSpriteStore={setSpriteStore} />
-            ))
-          }
-
-         
+            {
+              //  console.log(spriteStore)
+              spriteStore?.map((sprite) => (
+                <Sprite
+                  key={sprite.id}
+                  sprite={sprite}
+                  spriteStore={spriteStore}
+                  setSpriteStore={setSpriteStore}
+                />
+              ))
+            }
           </div>
           <div className="bg-white">
             currentX: {Math.trunc(currentSprite.currentPosition.x)}

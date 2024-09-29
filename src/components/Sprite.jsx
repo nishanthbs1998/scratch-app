@@ -7,23 +7,20 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
     const playSprite = async () => {
         await manageRepeat(1);
       }
-      useEffect(() => {
-        setSpriteStore((prevStore) => {
-          const updatedStore = prevStore.map((s) => {
-            if (s.id === sprite.id) {
-              s.isPlaying = false;
-            }
-            return s;
-          });
-          return updatedStore;
+      // useEffect(() => {
+      //   setSpriteStore((prevStore) => {
+      //     const updatedStore = prevStore.map((s) => {
+      //       if (s.id === sprite.id) {
+      //         s.isPlaying = false;
+      //       }
+      //       return s;
+      //     });
+      //     return updatedStore;
         
-      })}, [sprite.currentPosition]);
+      // })}, [sprite.currentPosition]);
     useEffect(()=>{
         console.log(sprite.isPlaying, "sprite.isPlaying")
-        if(sprite.isPlaying)
-        {
-            playSprite();
-        }
+        playSprite();
 
     },[sprite.isPlaying])
 
@@ -62,8 +59,8 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
 
   const animateGoto = (value) => {
     return new Promise((resolve) => {
-      setX(Number(value.x));
-      setY(Number(value.y));
+      setX((prev)=>prev+Number(value.x));
+      setY((prev)=>prev+Number(value.y));
       setTimeout(() => resolve(), 500); // Animation duration
     });
   };
@@ -83,6 +80,17 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
             }
           }
         }
+
+        // setSpriteStore((prevStore) => {
+        //   const updatedStore = prevStore.map((s) => {
+        //     if (s.id === sprite.id) {
+        //       s.currentPosition = { x, y, degree };
+        //     }
+        //     return s;
+        //   });
+        //   return updatedStore;
+        // });
+
       };
     return(
         <>       

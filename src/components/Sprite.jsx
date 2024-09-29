@@ -22,11 +22,12 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
                 } else if (motion.type === "repeat") {
                   const toRepeat=actions.slice();
                   actions=[]
-                  const repeatAction = manageRepeat(() => {
+                  const repeatAction = manageRepeat(async() => {
                     // Execute each stored action
                    // toRepeat.forEach((action) =>void action());
                    for(const action of toRepeat){
-                       action();
+                    
+                      await action();
                     }
                   }, motion.value);
             
@@ -41,20 +42,8 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
         }
       }
 
-      useEffect(() => {
-        console.log(spriteStore, "spriteStore")
-      }, [spriteStore]);
-      // useEffect(() => {
-      //   setSpriteStore((prevStore) => {
-      //     const updatedStore = prevStore.map((s) => {
-      //       if (s.id === sprite.id) {
-      //         s.isPlaying = false;
-      //       }
-      //       return s;
-      //     });
-      //     return updatedStore;
-        
-      // })}, [sprite.currentPosition]);
+
+     
     useEffect(()=>{
         console.log(sprite.isPlaying, "sprite.isPlaying")
         playSprite();
@@ -132,26 +121,14 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
 
     const manageRepeat =  (repeatFn, times) => {
 
-      return ()=>{
+      return async()=>{
         for(let i=0; i<times; i++){
-           repeatFn();
+          console.log('called')
+          await repeatFn();
         }
       }
 
-        // if (repeatCount <= 0) {
-        //   return;
-        // }
-        // for (let i = 0; i < repeatCount; i++) {
-        //   for (const motion of sprite.motions) {
-        //     if (motion.type === "move") {
-        //       await animateMove(motion.value);
-        //     } else if (motion.type === "rotate") {
-        //       await animateRotate(motion.value);
-        //     } else if (motion.type === "goto") {
-        //       await animateGoto(motion.value);
-        //     }
-        //   }
-        // }
+      
 
       };
     return(

@@ -31,12 +31,15 @@ function App() {
       return updatedStore;
     });
   };
+  useEffect(()=>{
+    console.log(currentSprite, 'currentSprite')
+  }, [currentSprite])
 useEffect(()=>{
   console.log(spriteStore, 'spriteStore')
 }, [spriteStore])
-  useEffect(() => {
-    setCurrentSprite(spriteStore[spriteStore.length - 1]);
-  }, [spriteStore.length]);
+  // useEffect(() => {
+  //   setCurrentSprite(spriteStore[spriteStore.length - 1]);
+  // }, [spriteStore.length]);
 
   const fileInputRef = useRef(null);
   const handleFileUpload = (event) => {
@@ -44,16 +47,21 @@ useEffect(()=>{
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSpriteStore((prevStore) => [
-          ...prevStore,
-          {
+        setSpriteStore((prevStore) => {
+          const newSprite={
             id: Date.now(),
             name: file.name,
             src: reader.result,
             motions: [],
             currentPosition: { x: 0, y: 0, degree: 0 },
-          },
-        ]);
+          }
+          const updatedStore=[
+          ...prevStore,
+          newSprite
+        ]
+      setCurrentSprite(newSprite)
+      return updatedStore
+      });
       };
       reader.readAsDataURL(file);
     }

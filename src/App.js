@@ -27,42 +27,6 @@ function App() {
   
   const [repeat, setRepeat] = useState(1);
   
-  const handleMove = (value) => {
-    console.log(currentSprite, "currentSprite");
-    // currentSprite.motions.push({ type: "move", value: value });
-    setSpriteStore((prevStore) => {
-      const updatedStore = prevStore.map((sprite) => {
-        if (sprite.id === currentSprite.id) {
-          sprite.motions.push({ type: "move", value: value });
-          // return currentSprite;
-        }
-        return sprite;
-      });
-      return updatedStore;
-    });
-    // setMotionStack({
-    //   ...motionStack,
-    //   sprite1: [...motionStack["sprite1"], { type: "move", value: value }],
-    // });
-  };
-  const handleRotate = (value) => {
-  //  currentSprite.motions.push({ type: "rotate", value: value });
-    setSpriteStore((prevStore) => {
-      const updatedStore = prevStore.map((sprite) => {
-        if (sprite.id === currentSprite.id) {
-          sprite.motions.push({ type: "rotate", value: value });
-        //  return currentSprite;
-        }
-        return sprite;
-      });
-      return updatedStore;
-    });
-    // setMotionStack({
-    //   ...motionStack,
-    //   sprite1: [...motionStack["sprite1"], { type: "rotate", value: value }],
-    // });
-  };
-
   
 const handlePlay=()=>{
   setSpriteStore((prevStore) => {
@@ -74,45 +38,12 @@ const handlePlay=()=>{
   });
 }
 
-  const handleGoto = (value) => {
-   // currentSprite.motions.push({ type: "goto", value: value });
-    setSpriteStore((prevStore) => {
-      const updatedStore = prevStore.map((sprite) => {
-        if (sprite.id === currentSprite.id) {
-        //  return currentSprite;
-          sprite.motions.push({ type: "goto", value: value });
-        }
-        return sprite;
-      });
-      return updatedStore;
-    });
-    // setMotionStack({
-    //   ...motionStack,
-    //   sprite1: [...motionStack["sprite1"], { type: "goto", value: value }],
-    // });
-  };
-  const handleRepeat = (value) => {
-   // currentSprite.motions.push({ type: "repeat", value: value });
-    setSpriteStore((prevStore) => {
-      const updatedStore = prevStore.map((sprite) => {
-        if (sprite.id === currentSprite.id) {
-        //  return currentSprite;
-          sprite.motions.push({ type: "repeat", value: value });
-        }
-        return sprite;
-      });
-      return updatedStore;
-    });
-    // setMotionStack({
-    //   ...motionStack,
-    //   sprite1: [...motionStack["sprite1"], { type: "repeat", value: value }],
-    // });
-    setRepeat(value);
-  };
+  
  
+useEffect(() => {
+setCurrentSprite(spriteStore[spriteStore.length-1])
+},[spriteStore.length])
 
-  // State to store sprites on the screen
-  // const [screenSprites, setScreenSprites] = useState([]);
   const fileInputRef = useRef(null);
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -125,6 +56,7 @@ const handlePlay=()=>{
         ]);
       };
       reader.readAsDataURL(file);
+      
 
     }
   };
@@ -132,9 +64,7 @@ const handlePlay=()=>{
   const handleUploadClick = () => {
     fileInputRef.current.click(); // Programmatically click the hidden file input
   };
-  useEffect(() => {
-    console.log(spriteStore, 'spriteStore updated')
-  }, [spriteStore]);
+
   return (
     <div className="flex flex-col gap-2">
       <button className="bg-blue-400" onClick={handlePlay}>
@@ -142,25 +72,25 @@ const handlePlay=()=>{
       </button>
       <div className="bg-black flex gap-5 h-screen">
         <div className="bg-blue-400 w-1/2">
-          <div draggable>
+          <div draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'move', value:move}))}>
             move x
             <input
               type="text"
               value={move}
               onChange={(e) => setMove(e.target.value)}
             />
-            <button onClick={() => handleMove(move)}>add move</button>
+
           </div>
-          <div className="mt-2">
+          <div className="mt-2" draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'rotate', value:rotate}))}>
             rotate
             <input
               type="text"
               value={rotate}
               onChange={(e) => setRotate(e.target.value)}
             />
-            <button onClick={() => handleRotate(rotate)}>add rotate</button>
+
           </div>
-          <div className="mt-2">
+          <div className="mt-2" draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'goto', value:goto}))}>
             goto x
             <input
               className="w-1/12"
@@ -185,20 +115,20 @@ const handlePlay=()=>{
                 }))
               }
             />
-            <button onClick={() => handleGoto(goto)}>add goto</button>
+
           </div>
-          <div className="mt-2">
+          <div className="mt-2" draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'repeat', value:repeat}))}>
             repeat
             <input
               type="text"
               value={repeat}
               onChange={(e) => setRepeat(e.target.value)}
             />
-            <button onClick={() => handleRepeat(repeat)}>add repeat</button>
+
           </div>
         </div>
 
-        <Workspace motionStack={currentSprite.motions} />
+        <Workspace motions={currentSprite?.motions} currentSprite={currentSprite} setSpriteStore={setSpriteStore} />
         <div className="flex flex-col w-1/2  h-screen">
           <div className="bg-white relative overflow-hidden h-1/2">
           {

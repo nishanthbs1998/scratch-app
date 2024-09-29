@@ -6,7 +6,19 @@ const Workspace = ({
   currentSprite,
   setDraggedItemId,
 }) => {
-  
+
+  const handleRepeat = (item) => {
+    setSpriteStore((prevStore) => {
+      const updatedStore = prevStore.map((sprite) => {
+        if (sprite.id === currentSprite.id) {
+          sprite.motions.push({ id: item.id, type: "repeat", value: item.value });
+        }
+        return sprite;
+      });
+      return updatedStore;
+    });
+  };
+
   const handleMove = (item) => {
     setSpriteStore((prevStore) => {
       const updatedStore = prevStore.map((sprite) => {
@@ -49,14 +61,17 @@ const Workspace = ({
       return;
     }
 
-    if (item.type === "move") {
+   else if (item.type === "move") {
       handleMove(item);
     }
-    if (item.type === "rotate") {
+   else if (item.type === "rotate") {
       handleRotate(item);
     }
-    if (item.type === "goto") {
+   else if (item.type === "goto") {
       handleGoto(item);
+    }
+    else if(item.type==='repeat'){
+      handleRepeat(item)
     }
   };
 

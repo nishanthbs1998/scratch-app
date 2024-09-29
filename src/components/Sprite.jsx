@@ -1,11 +1,44 @@
-import { motion } from "framer-motion";
+import { animate, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 const Sprite=({sprite, spriteStore, setSpriteStore})=>{
     const [x, setX] = useState(sprite.currentPosition.x);
   const [y, setY] = useState(sprite.currentPosition.y);
   const [degree, setDegree] = useState(sprite.currentPosition.degree);
     const playSprite = async () => {
-        await manageRepeat(1);
+        //await manageRepeat(1);
+        let actions=[]
+
+        for(let i=0;i<sprite.motions.length;i++){
+          const motion=sprite.motions[i]
+          if (motion.type === "move") {
+                // const action= async()=> await animateMove(motion.value);
+                 actions.push(()=>animateMove(motion.value));
+                } else if (motion.type === "rotate") {
+                //  const action= async()=> await animateRotate(motion.value);
+                  actions.push(()=>animateRotate(motion.value));
+                } else if (motion.type === "goto") {
+                 // const action= async()=> await animateGoto(motion.value);
+                  actions.push(()=>animateGoto(motion.value));
+                } else if (motion.type === "repeat") {
+                  const toRepeat=actions.slice();
+                  actions=[]
+                  const repeatAction = manageRepeat(() => {
+                    // Execute each stored action
+                   // toRepeat.forEach((action) =>void action());
+                   for(const action of toRepeat){
+                       action();
+                    }
+                  }, motion.value);
+            
+                  actions.push(repeatAction);
+                }
+
+
+        }
+        for (const action of actions) {
+          console.log(action, "action")
+          await action();
+        }
       }
       // useEffect(() => {
       //   setSpriteStore((prevStore) => {
@@ -65,31 +98,28 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
     });
   };
 
-    const manageRepeat = async (repeatCount) => {
-        if (repeatCount <= 0) {
-          return;
-        }
-        for (let i = 0; i < repeatCount; i++) {
-          for (const motion of sprite.motions) {
-            if (motion.type === "move") {
-              await animateMove(motion.value);
-            } else if (motion.type === "rotate") {
-              await animateRotate(motion.value);
-            } else if (motion.type === "goto") {
-              await animateGoto(motion.value);
-            }
-          }
-        }
+    const manageRepeat =  (repeatFn, times) => {
 
-        // setSpriteStore((prevStore) => {
-        //   const updatedStore = prevStore.map((s) => {
-        //     if (s.id === sprite.id) {
-        //       s.currentPosition = { x, y, degree };
+      return ()=>{
+        for(let i=0; i<times; i++){
+           repeatFn();
+        }
+      }
+
+        // if (repeatCount <= 0) {
+        //   return;
+        // }
+        // for (let i = 0; i < repeatCount; i++) {
+        //   for (const motion of sprite.motions) {
+        //     if (motion.type === "move") {
+        //       await animateMove(motion.value);
+        //     } else if (motion.type === "rotate") {
+        //       await animateRotate(motion.value);
+        //     } else if (motion.type === "goto") {
+        //       await animateGoto(motion.value);
         //     }
-        //     return s;
-        //   });
-        //   return updatedStore;
-        // });
+        //   }
+        // }
 
       };
     return(

@@ -1,14 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import Workspace from "./components/Workspace";
-
-import { motion } from "framer-motion";
 import Sprite from "./components/Sprite";
 function App() {
-  const [motionStack, setMotionStack] = useState({
-    sprite1: [],
-  });
 
-  
+  const [isOverDropZone, setIsOverDropZone] = useState(false);
+  const [draggedItemId, setDraggedItemId]=useState(null);
   // State to store available sprites
   const [spriteStore, setSpriteStore] = useState([ 
     {
@@ -65,13 +61,25 @@ setCurrentSprite(spriteStore[spriteStore.length-1])
     fileInputRef.current.click(); // Programmatically click the hidden file input
   };
 
+  const handleDeleteMotion=(id)=>{
+    setSpriteStore((prevStore) => {
+      const updatedStore = prevStore.map((sprite) => {
+        if (sprite.id === currentSprite.id) {
+          sprite.motions=sprite.motions.filter(motion=>motion.id!==id);
+        }
+        return sprite;
+      });
+      return updatedStore;
+    });
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <button className="bg-blue-400" onClick={handlePlay}>
         Play
       </button>
       <div className="bg-black flex gap-5 h-screen">
-        <div className="bg-blue-400 w-1/2">
+        <div className="bg-blue-400 w-1/2" onDragEnter={() => handleDeleteMotion(draggedItemId)}>
           <div draggable onDragStart={(e)=>e.dataTransfer.setData('text/plain', JSON.stringify({type:'move', value:move}))}>
             move x
             <input
@@ -128,7 +136,7 @@ setCurrentSprite(spriteStore[spriteStore.length-1])
           </div>
         </div>
 
-        <Workspace motions={currentSprite?.motions} currentSprite={currentSprite} setSpriteStore={setSpriteStore} />
+        <Workspace setDraggedItemId={setDraggedItemId} isOverDropZone={isOverDropZone} motions={currentSprite?.motions} currentSprite={currentSprite} setSpriteStore={setSpriteStore} />
         <div className="flex flex-col w-1/2  h-screen">
           <div className="bg-white relative overflow-hidden h-1/2">
           {

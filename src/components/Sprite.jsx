@@ -49,7 +49,10 @@ const Sprite=({sprite, spriteStore, setSpriteStore, spriteRefs})=>{
      
     useEffect(()=>{
         console.log(sprite.isPlaying, "sprite.isPlaying")
-        playSprite();
+        if(sprite.isPlaying){
+            playSprite();
+        }
+       // playSprite();
 
     },[sprite.isPlaying])
 
@@ -137,6 +140,17 @@ const Sprite=({sprite, spriteStore, setSpriteStore, spriteRefs})=>{
     return(
         <div className="relative">       
             <motion.img
+            onAnimationComplete={() => {
+              setSpriteStore((prevStore) => {
+                const updatedStore = prevStore.map((s) => {
+                  if (s.id === sprite.id) {
+                    s.isPlaying = false;
+                  }
+                  return s;
+                });
+                return updatedStore;
+              });
+            }}
             id={`sprite-${sprite.id}`}
              initial={{ x: 0, y: 0 }} 
              animate={{ x: sprite.currentPosition.x, y: sprite.currentPosition.y, rotate: sprite.currentPosition.degree }}

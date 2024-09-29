@@ -75,6 +75,14 @@ useEffect(()=>{
     });
   };
 
+  useEffect(() => {
+    // Find the updated current sprite from the spriteStore
+    const updatedSprite = spriteStore.find((sprite) => sprite.id === currentSprite.id);
+    if (updatedSprite) {
+      setCurrentSprite(updatedSprite);
+    }
+  }, [spriteStore]);
+
   return (
     <div className="flex flex-col gap-2">
       <button className="bg-blue-400" onClick={handlePlay}>

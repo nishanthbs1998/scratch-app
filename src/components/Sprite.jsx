@@ -37,9 +37,13 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
         }
         for (const action of actions) {
           console.log(action, "action")
-          await action();
+           action();
         }
       }
+
+      useEffect(() => {
+        console.log(spriteStore, "spriteStore")
+      }, [spriteStore]);
       // useEffect(() => {
       //   setSpriteStore((prevStore) => {
       //     const updatedStore = prevStore.map((s) => {
@@ -61,7 +65,7 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
     setSpriteStore((prevStore) => {
       const updatedStore = prevStore.map((s) => {
         if (s.id === sprite.id) {
-          s.currentPosition = { x, y, degree };
+          s.currentPosition = {...s.currentPosition, x };
         }
         return s;
       });
@@ -69,11 +73,39 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
     }
     );
 
-    }, [x, y, degree]);
+    }, [x]);
+
+    useEffect(() => {
+      setSpriteStore((prevStore) => {
+        const updatedStore = prevStore.map((s) => {
+          if (s.id === sprite.id) {
+            s.currentPosition = {...s.currentPosition, y };
+          }
+          return s;
+        });
+        return updatedStore;
+      }
+      );
+  
+      }, [y]);
+
+      useEffect(() => {
+        setSpriteStore((prevStore) => {
+          const updatedStore = prevStore.map((s) => {
+            if (s.id === sprite.id) {
+              s.currentPosition = {...s.currentPosition, degree };
+            }
+            return s;
+          });
+          return updatedStore;
+        }
+        );
+    
+        }, [degree]);
   const animateMove = (value) => {
     return new Promise((resolve) => {
       setX((prevX) => {
-        const newX = prevX + Number(value);
+        const newX = sprite.currentPosition.x + Number(value);
         setTimeout(() => resolve(), 500); // Animation duration
         return newX;
       });
@@ -83,7 +115,7 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
   const animateRotate = (value) => {
     return new Promise((resolve) => {
       setDegree((prevDegree) => {
-        const newDegree = prevDegree + Number(value);
+        const newDegree = sprite.currentPosition.degree + Number(value);
         setTimeout(() => resolve(), 500); // Animation duration
         return newDegree;
       });
@@ -92,8 +124,8 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
 
   const animateGoto = (value) => {
     return new Promise((resolve) => {
-      setX((prev)=>prev+Number(value.x));
-      setY((prev)=>prev+Number(value.y));
+      setX((prev)=>sprite.currentPosition.x+Number(value.x));
+      setY((prev)=>sprite.currentPosition.y+Number(value.y));
       setTimeout(() => resolve(), 500); // Animation duration
     });
   };
@@ -123,15 +155,29 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
 
       };
     return(
-        <>       
+        <div className="relative">       
             <motion.img
              initial={{ x: 0, y: 0 }} 
-             animate={{ x: x, y: y, rotate: degree }}
+             animate={{ x: sprite.currentPosition.x, y: sprite.currentPosition.y, rotate: sprite.currentPosition.degree }}
              transition={{ duration: 0.5, ease: 'linear'}}
-             style={{ x: x, y: y }}
-             onDrag={(event, info) => {
+             onDragEnd={(event, info) => {
                event.preventDefault();
-               console.log(info)
+               setSpriteStore((prevStore) => {
+                return prevStore.map((s) => {
+                  if (s.id === sprite.id) {
+                    return {
+                      ...s,
+                      currentPosition: {
+                        ...s.currentPosition,
+                        x: Number(s.currentPosition.x)+Number(info.offset.x),  // Use offset for absolute positioning
+                        y: Number(s.currentPosition.y)+Number(info.offset.y),
+                      },
+                    };
+                  }
+                  return s;
+                });
+              });
+              console.log(info)
              }}
              key={sprite.id}
              drag
@@ -142,7 +188,7 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
               className="absolute w-20 h-20 object-cover"
             />
            
-          </>
+          </div>
 
     )
 }

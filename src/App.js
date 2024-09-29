@@ -9,7 +9,7 @@ function App() {
       id: 1,
       name: "sprite_1",
       src: "https://via.placeholder.com/100x100.png?text=Sprite+1",
-      currentPosition: { x: 0, y: 0, degree: 0 },
+      currentPosition: { x: 100, y: 100, degree: 0 },
       motions: [],
       isPlaying: false,
     },
@@ -20,6 +20,35 @@ function App() {
   const [goto, setGoto] = useState({ x: 0, y: 0 });
 
   const [repeat, setRepeat] = useState(1);
+
+  const spriteRefs = useRef({}); // Ref to store sprite DOM elements
+
+  const checkIntersections = () => {
+    const rects = Object.entries(spriteRefs.current).map(([id, ref]) => {
+      return { id, rect: ref.getBoundingClientRect() };
+    });
+
+    for (let i = 0; i < rects.length; i++) {
+      for (let j = i + 1; j < rects.length; j++) {
+        if (intersect(rects[i].rect, rects[j].rect)) {
+          console.log(`Sprites ${rects[i].id} and ${rects[j].id} are intersecting!`);
+        }
+      }
+    }
+  };
+
+  const intersect = (rectA, rectB) => {
+    return !(
+      rectA.right < rectB.left ||
+      rectA.left > rectB.right ||
+      rectA.bottom < rectB.top ||
+      rectA.top > rectB.bottom
+    );
+  };
+
+  useEffect(() => {
+    checkIntersections(); // Check for intersections whenever sprite positions change
+  }, [spriteStore]);
 
   const handlePlay = () => {
     setSpriteStore((prevStore) => {
@@ -204,6 +233,7 @@ useEffect(()=>{
                   sprite={sprite}
                   spriteStore={spriteStore}
                   setSpriteStore={setSpriteStore}
+                  spriteRefs={spriteRefs}
                 />
               ))
             }

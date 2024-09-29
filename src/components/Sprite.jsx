@@ -1,9 +1,12 @@
 import { animate, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-const Sprite=({sprite, spriteStore, setSpriteStore})=>{
+const Sprite=({sprite, spriteStore, setSpriteStore, spriteRefs})=>{
     const [x, setX] = useState(sprite.currentPosition.x);
   const [y, setY] = useState(sprite.currentPosition.y);
   const [degree, setDegree] = useState(sprite.currentPosition.degree);
+  useEffect(() => {
+    spriteRefs.current[sprite.id] = document.getElementById(`sprite-${sprite.id}`);
+  }, [sprite.id, spriteRefs]);
     const playSprite = async () => {
         //await manageRepeat(1);
         let actions=[]
@@ -134,6 +137,7 @@ const Sprite=({sprite, spriteStore, setSpriteStore})=>{
     return(
         <div className="relative">       
             <motion.img
+            id={`sprite-${sprite.id}`}
              initial={{ x: 0, y: 0 }} 
              animate={{ x: sprite.currentPosition.x, y: sprite.currentPosition.y, rotate: sprite.currentPosition.degree }}
              transition={{ duration: 0.5, ease: 'linear'}}

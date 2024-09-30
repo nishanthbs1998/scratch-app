@@ -120,7 +120,7 @@ function App() {
   };
 
   const fileInputRef = useRef(null);
-  const handleFileUpload = (event) => {
+  const handleSpriteUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
@@ -364,7 +364,7 @@ function App() {
                     type="file"
                     ref={fileInputRef}
                     className="hidden"
-                    onChange={handleFileUpload}
+                    onChange={handleSpriteUpload}
                   />
                 </div>
               </div>

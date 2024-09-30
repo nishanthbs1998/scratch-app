@@ -106,6 +106,7 @@ function App() {
   useEffect(() => {
     const interval = setInterval(checkIntersections, 500);
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spriteStore]);
 
   const handlePlay = () => {
@@ -172,6 +173,7 @@ function App() {
     if (updatedSprite) {
       setCurrentSprite(updatedSprite);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [spriteStore]);
 
   return (

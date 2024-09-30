@@ -61,6 +61,7 @@ const Sprite = ({ sprite, setSpriteStore, spriteRefs }) => {
         );
       });
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sprite.isPlaying]);
 
   const animateMove = (value) => {

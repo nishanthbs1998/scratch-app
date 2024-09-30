@@ -357,7 +357,7 @@ function App() {
                 ))}
               </div>
               <div className="p-2 flex justify-end bg-[#E6F0FF]">
-                <div className="bg-yellow-200 p-1 rounded-md">
+                <div className="bg-[#4CBF56] text-white py-1 px-4 rounded-md">
                   <button onClick={handleUploadClick}>add sprite</button>
                   <input
                     type="file"

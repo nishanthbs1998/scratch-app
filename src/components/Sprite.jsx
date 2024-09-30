@@ -1,191 +1,159 @@
 import { animate, motion } from "framer-motion";
-import { useEffect, useState } from "react";
-const Sprite=({sprite, spriteStore, setSpriteStore, spriteRefs})=>{
-    const [x, setX] = useState(sprite.currentPosition.x);
-  const [y, setY] = useState(sprite.currentPosition.y);
-  const [degree, setDegree] = useState(sprite.currentPosition.degree);
+import { useEffect, useState, useRef } from "react";
+
+const Sprite = ({ sprite, spriteStore, setSpriteStore, spriteRefs }) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  // Separate refs for the animation to avoid intermediate re-renders
+  const xRef = useRef(sprite.currentPosition.x);
+  const yRef = useRef(sprite.currentPosition.y);
+  const degreeRef = useRef(sprite.currentPosition.degree);
+
+  // Update DOM reference on initial render
   useEffect(() => {
     spriteRefs.current[sprite.id] = document.getElementById(`sprite-${sprite.id}`);
   }, [sprite.id, spriteRefs]);
-    const playSprite = async () => {
-        //await manageRepeat(1);
-        let actions=[]
 
-        for(let i=0;i<sprite.motions.length;i++){
-          const motion=sprite.motions[i]
-          if (motion.type === "move") {
-                // const action= async()=> await animateMove(motion.value);
-                 actions.push(()=>animateMove(motion.value));
-                } else if (motion.type === "rotate") {
-                //  const action= async()=> await animateRotate(motion.value);
-                  actions.push(()=>animateRotate(motion.value));
-                } else if (motion.type === "goto") {
-                 // const action= async()=> await animateGoto(motion.value);
-                  actions.push(()=>animateGoto(motion.value));
-                } else if (motion.type === "repeat") {
-                  const toRepeat=actions.slice();
-                  actions=[]
-                  const repeatAction = manageRepeat(async() => {
-                    // Execute each stored action
-                   // toRepeat.forEach((action) =>void action());
-                   for(const action of toRepeat){
-                    
-                      await action();
-                    }
-                  }, motion.value);
-            
-                  actions.push(repeatAction);
-                }
+  const playSprite = async () => {
+    let actions = [];
 
-
-        }
-        for (const action of actions) {
-          console.log(action, "action")
-          await action();
-        }
-      }
-
-
-     
-    useEffect(()=>{
-        console.log(sprite.isPlaying, "sprite.isPlaying")
-        if(sprite.isPlaying){
-            playSprite();
-        }
-        // playSprite();
-
-    },[sprite.isPlaying])
-
-    useEffect(() => {
-    setSpriteStore((prevStore) => {
-      const updatedStore = prevStore.map((s) => {
-        if (s.id === sprite.id) {
-          s.currentPosition = {...s.currentPosition, x };
-        }
-        return s;
-      });
-      return updatedStore;
-    }
-    );
-
-    }, [x]);
-
-    useEffect(() => {
-      setSpriteStore((prevStore) => {
-        const updatedStore = prevStore.map((s) => {
-          if (s.id === sprite.id) {
-            s.currentPosition = {...s.currentPosition, y };
+    for (let i = 0; i < sprite.motions.length; i++) {
+      const motion = sprite.motions[i];
+      if (motion.type === "move") {
+        actions.push(() => animateMove(motion.value));
+      } else if (motion.type === "rotate") {
+        actions.push(() => animateRotate(motion.value));
+      } else if (motion.type === "goto") {
+        actions.push(() => animateGoto(motion.value));
+      } else if (motion.type === "repeat") {
+        const toRepeat = actions.slice();
+        actions = [];
+        const repeatAction = manageRepeat(async () => {
+          for (const action of toRepeat) {
+            await action();
           }
-          return s;
-        });
-        return updatedStore;
-      }
-      );
-  
-      }, [y]);
+        }, motion.value);
 
-      useEffect(() => {
-        setSpriteStore((prevStore) => {
-          const updatedStore = prevStore.map((s) => {
-            if (s.id === sprite.id) {
-              s.currentPosition = {...s.currentPosition, degree };
-            }
-            return s;
-          });
-          return updatedStore;
-        }
+        actions.push(repeatAction);
+      }
+    }
+
+    for (const action of actions) {
+      await action();
+    }
+  };
+
+  useEffect(() => {
+    if (sprite.isPlaying) {
+      setIsAnimating(true);
+      playSprite().then(() => {
+        setIsAnimating(false);
+        // Update the state after animation finishes
+        setSpriteStore((prevStore) =>
+          prevStore.map((s) =>
+            s.id === sprite.id
+              ? {
+                  ...s,
+                  currentPosition: {
+                    x: xRef.current,
+                    y: yRef.current,
+                    degree: degreeRef.current,
+                  },
+                  isPlaying: false,
+                }
+              : s
+          )
         );
-    
-        }, [degree]);
+      });
+    }
+  }, [sprite.isPlaying]);
+
+  // Animate move
   const animateMove = (value) => {
     return new Promise((resolve) => {
-      setX((prevX) => {
-        const newX = sprite.currentPosition.x + Number(value);
-        setTimeout(() => resolve(), 500); // Animation duration
-        return newX;
-      });
+      xRef.current += Number(value);
+      setTimeout(resolve, 500); // Animation duration
     });
   };
 
+  // Animate rotate
   const animateRotate = (value) => {
     return new Promise((resolve) => {
-      setDegree((prevDegree) => {
-        const newDegree = sprite.currentPosition.degree + Number(value);
-        setTimeout(() => resolve(), 500); // Animation duration
-        return newDegree;
-      });
+      degreeRef.current += Number(value);
+      setTimeout(resolve, 500); // Animation duration
     });
   };
 
+  // Animate goto
   const animateGoto = (value) => {
     return new Promise((resolve) => {
-      setX((prev)=>sprite.currentPosition.x+Number(value.x));
-      setY((prev)=>sprite.currentPosition.y+Number(value.y));
-      setTimeout(() => resolve(), 500); // Animation duration
+      xRef.current = Number(value.x);
+      yRef.current = Number(value.y);
+      setTimeout(resolve, 500); // Animation duration
     });
   };
 
-    const manageRepeat =  (repeatFn, times) => {
-
-      return async()=>{
-        for(let i=0; i<times; i++){
-          console.log('called')
-          await repeatFn();
-        }
+  // Manage repeat logic
+  const manageRepeat = (repeatFn, times) => {
+    return async () => {
+      for (let i = 0; i < times; i++) {
+        await repeatFn();
       }
+    };
+  };
 
-      
-
-      };
-    return(
-        <div className="relative">       
-            <motion.img
-            onAnimationComplete={() => {
-              setSpriteStore((prevStore) => {
-                const updatedStore = prevStore.map((s) => {
-                  if (s.id === sprite.id) {
-                    s.isPlaying = false;
+  return (
+    <div className="relative">
+      <motion.img
+        onAnimationComplete={() => {
+          // On animation complete, we update state
+          setIsAnimating(false);
+          setSpriteStore((prevStore) =>
+            prevStore.map((s) =>
+              s.id === sprite.id
+                ? {
+                    ...s,
+                    currentPosition: {
+                      x: xRef.current,
+                      y: yRef.current,
+                      degree: degreeRef.current,
+                    },
+                    isPlaying: false,
                   }
-                  return s;
-                });
-                return updatedStore;
-              });
-            }}
-            id={`sprite-${sprite.id}`}
-             initial={{ x: 0, y: 0 }} 
-             animate={{ x: sprite.currentPosition.x, y: sprite.currentPosition.y, rotate: sprite.currentPosition.degree }}
-             transition={{ duration: 0.5, ease: 'linear'}}
-             onDragEnd={(event, info) => {
-               event.preventDefault();
-               setSpriteStore((prevStore) => {
-                return prevStore.map((s) => {
-                  if (s.id === sprite.id) {
-                    return {
-                      ...s,
-                      currentPosition: {
-                        ...s.currentPosition,
-                        x: Number(s.currentPosition.x)+Number(info.offset.x),  // Use offset for absolute positioning
-                        y: Number(s.currentPosition.y)+Number(info.offset.y),
-                      },
-                    };
+                : s
+            )
+          );
+        }}
+        id={`sprite-${sprite.id}`}
+        initial={{ x: 0, y: 0 }}
+        animate={{ x: xRef.current, y: yRef.current, rotate: degreeRef.current }}
+        transition={{ duration: 0.5, ease: "linear" }}
+        onDragEnd={(event, info) => {
+          event.preventDefault();
+          xRef.current += info.offset.x;
+          yRef.current += info.offset.y;
+
+          // Update state after dragging ends
+          setSpriteStore((prevStore) =>
+            prevStore.map((s) =>
+              s.id === sprite.id
+                ? {
+                    ...s,
+                    currentPosition: { ...s.currentPosition, x: xRef.current, y: yRef.current },
                   }
-                  return s;
-                });
-              });
-              console.log(info)
-             }}
-             key={sprite.id}
-             drag
-               dragMomentum={false}
-
-              src={sprite.src}
-              alt={sprite.name}
-              className="absolute w-20 h-20 object-cover"
-            />
-           
-          </div>
-
-    )
-}
+                : s
+            )
+          );
+        }}
+        key={sprite.id}
+        drag
+        dragMomentum={false}
+        src={sprite.src}
+        alt={sprite.name}
+        className="absolute w-20 h-20 object-cover"
+      />
+    </div>
+  );
+};
 
 export default Sprite;

@@ -81,7 +81,6 @@ function App() {
             sprites[j].isCollided = true;
           }
         } else {
-          // If they are not colliding, reset their collided state
           if (sprites[i].isCollided || sprites[j].isCollided) {
             sprites[i].isCollided = false;
             sprites[j].isCollided = false;
@@ -167,7 +166,6 @@ function App() {
   };
 
   useEffect(() => {
-    // Find the updated current sprite from the spriteStore
     const updatedSprite = spriteStore.find(
       (sprite) => sprite.id === currentSprite.id
     );
@@ -243,7 +241,7 @@ function App() {
               )
             }
           >
-           <span className="text-white">go to x:</span> 
+            <span className="text-white">go to x:</span>
             <input
               className="w-3/12 h-5 rounded-full p-2"
               type="text"
@@ -255,7 +253,7 @@ function App() {
                 }))
               }
             />
-           <span className="text-white">y:</span> 
+            <span className="text-white">y:</span>
             <input
               className="w-3/12 h-5 rounded-full p-2"
               type="text"
@@ -285,7 +283,7 @@ function App() {
           >
             <span className="text-white">repeat</span>
             <input
-            className="w-3/12 h-5 rounded-full p-2"
+              className="w-3/12 h-5 rounded-full p-2"
               type="text"
               value={repeat}
               onChange={(e) => setRepeat(e.target.value)}

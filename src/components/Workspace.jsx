@@ -1,5 +1,3 @@
-import { div } from "framer-motion/client";
-
 const Workspace = ({
   motions,
   setSpriteStore,
@@ -80,12 +78,12 @@ const Workspace = ({
   return (
     <div
       onDrop={(e) => {
-        if(e.dataTransfer.getData("text/plain"))
-        handleDrop(JSON.parse(e.dataTransfer.getData("text/plain")));
+        if (e.dataTransfer.getData("text/plain"))
+          handleDrop(JSON.parse(e.dataTransfer.getData("text/plain")));
       }}
       onDragOver={(e) => e.preventDefault()}
       className="h-1/2 flex flex-col items-center"
-    > 
+    >
       <div>
         {motions?.map((motion, index) => (
           <div
@@ -94,19 +92,27 @@ const Workspace = ({
             onDragEnd={() => setDraggedItemId(null)}
             draggable
             key={motion.id}
-            className={`flex gap-2 ${motion.type==='repeat'?'bg-[#FFAB19]':'bg-[#4C97FF]'} p-2 w-full m-2 rounded items-center`}
+            className={`flex gap-2 ${
+              motion.type === "repeat" ? "bg-[#FFAB19]" : "bg-[#4C97FF]"
+            } p-2 w-full m-2 rounded items-center`}
           >
-            <div className="text-white">{motion.type==='goto'?'go to':motion.type}</div>
+            <div className="text-white">
+              {motion.type === "goto" ? "go to" : motion.type}
+            </div>
             {motion.type === "goto" ? (
               <div className="text-white">
                 x: {motion.value.x} y: {motion.value.y}
               </div>
             ) : (
               <>
-              <div className="text-white">{motion.value}</div>
-              {motion.type === "move" ? <div className="text-white">steps</div> 
-              : motion.type==='turn' ? <div className="text-white">degrees</div> 
-              : <div className="text-white">times</div>}
+                <div className="text-white">{motion.value}</div>
+                {motion.type === "move" ? (
+                  <div className="text-white">steps</div>
+                ) : motion.type === "turn" ? (
+                  <div className="text-white">degrees</div>
+                ) : (
+                  <div className="text-white">times</div>
+                )}
               </>
             )}
           </div>

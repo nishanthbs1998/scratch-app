@@ -1,17 +1,15 @@
-import { animate, motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 
-const Sprite = ({ sprite, spriteStore, setSpriteStore, spriteRefs }) => {
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  // Separate refs for the animation to avoid intermediate re-renders
+const Sprite = ({ sprite, setSpriteStore, spriteRefs }) => {
   const xRef = useRef(sprite.currentPosition.x);
   const yRef = useRef(sprite.currentPosition.y);
   const degreeRef = useRef(sprite.currentPosition.degree);
 
-  // Update DOM reference on initial render
   useEffect(() => {
-    spriteRefs.current[sprite.id] = document.getElementById(`sprite-${sprite.id}`);
+    spriteRefs.current[sprite.id] = document.getElementById(
+      `sprite-${sprite.id}`
+    );
   }, [sprite.id, spriteRefs]);
 
   const playSprite = async () => {
@@ -45,10 +43,7 @@ const Sprite = ({ sprite, spriteStore, setSpriteStore, spriteRefs }) => {
 
   useEffect(() => {
     if (sprite.isPlaying) {
-      setIsAnimating(true);
       playSprite().then(() => {
-        setIsAnimating(false);
-        // Update the state after animation finishes
         setSpriteStore((prevStore) =>
           prevStore.map((s) =>
             s.id === sprite.id
@@ -68,32 +63,28 @@ const Sprite = ({ sprite, spriteStore, setSpriteStore, spriteRefs }) => {
     }
   }, [sprite.isPlaying]);
 
-  // Animate move
   const animateMove = (value) => {
     return new Promise((resolve) => {
       xRef.current += Number(value);
-      setTimeout(resolve, 500); // Animation duration
+      setTimeout(resolve, 500);
     });
   };
 
-  // Animate rotate
   const animateRotate = (value) => {
     return new Promise((resolve) => {
       degreeRef.current += Number(value);
-      setTimeout(resolve, 500); // Animation duration
+      setTimeout(resolve, 500);
     });
   };
 
-  // Animate goto
   const animateGoto = (value) => {
     return new Promise((resolve) => {
       xRef.current = Number(value.x);
       yRef.current = Number(value.y);
-      setTimeout(resolve, 500); // Animation duration
+      setTimeout(resolve, 500);
     });
   };
 
-  // Manage repeat logic
   const manageRepeat = (repeatFn, times) => {
     return async () => {
       for (let i = 0; i < times; i++) {
@@ -106,8 +97,6 @@ const Sprite = ({ sprite, spriteStore, setSpriteStore, spriteRefs }) => {
     <div className="relative">
       <motion.img
         onAnimationComplete={() => {
-          // On animation complete, we update state
-          setIsAnimating(false);
           setSpriteStore((prevStore) =>
             prevStore.map((s) =>
               s.id === sprite.id
@@ -126,20 +115,27 @@ const Sprite = ({ sprite, spriteStore, setSpriteStore, spriteRefs }) => {
         }}
         id={`sprite-${sprite.id}`}
         initial={{ x: 0, y: 0 }}
-        animate={{ x: xRef.current, y: yRef.current, rotate: degreeRef.current }}
+        animate={{
+          x: xRef.current,
+          y: yRef.current,
+          rotate: degreeRef.current,
+        }}
         transition={{ duration: 0.5, ease: "linear" }}
         onDragEnd={(event, info) => {
           event.preventDefault();
           xRef.current += info.offset.x;
           yRef.current += info.offset.y;
 
-          // Update state after dragging ends
           setSpriteStore((prevStore) =>
             prevStore.map((s) =>
               s.id === sprite.id
                 ? {
                     ...s,
-                    currentPosition: { ...s.currentPosition, x: xRef.current, y: yRef.current },
+                    currentPosition: {
+                      ...s.currentPosition,
+                      x: xRef.current,
+                      y: yRef.current,
+                    },
                   }
                 : s
             )

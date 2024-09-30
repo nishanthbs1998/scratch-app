@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import Workspace from "./components/Workspace";
 import Sprite from "./components/Sprite";
+import { s } from "framer-motion/client";
 function App() {
   const [draggedItemId, setDraggedItemId] = useState(null);
+  const [isPending, startTransition] = useTransition();
   // State to store available sprites
   const [spriteStore, setSpriteStore] = useState([
     {
@@ -12,6 +14,7 @@ function App() {
       currentPosition: { x: 100, y: 100, degree: 0 },
       motions: [],
       isPlaying: false,
+      isCollided: false,
     },
   ]);
   const [currentSprite, setCurrentSprite] = useState(spriteStore[0]);
@@ -19,36 +22,162 @@ function App() {
   const [rotate, setRotate] = useState(0);
   const [goto, setGoto] = useState({ x: 0, y: 0 });
 
-  const [repeat, setRepeat] = useState(1);
+  const [repeat, setRepeat] = useState(0);
 
   const spriteRefs = useRef({}); // Ref to store sprite DOM elements
 
-  const checkIntersections = () => {
-    const rects = Object.entries(spriteRefs.current).map(([id, ref]) => {
-      return { id, rect: ref.getBoundingClientRect() };
-    });
-
-    for (let i = 0; i < rects.length; i++) {
-      for (let j = i + 1; j < rects.length; j++) {
-        if (intersect(rects[i].rect, rects[j].rect)) {
-          console.log(`Sprites ${rects[i].id} and ${rects[j].id} are intersecting!`);
-        }
-      }
-    }
-  };
-
-  const intersect = (rectA, rectB) => {
-    return !(
-      rectA.right < rectB.left ||
-      rectA.left > rectB.right ||
-      rectA.bottom < rectB.top ||
-      rectA.top > rectB.bottom
+  const checkCollision = (rect1, rect2) => {
+    return (
+      rect1.left < rect2.right &&
+      rect1.right > rect2.left &&
+      rect1.top < rect2.bottom &&
+      rect1.bottom > rect2.top
     );
   };
 
+  // const checkIntersections = () => {
+  //   const rects = Object.entries(spriteRefs.current).map(([id, ref]) => {
+  //     return { id, rect: ref.getBoundingClientRect() };
+  //   });
+  //   collidedPairs.current = [];
+  //   const uniquePairsSet = new Set();
+  //   for (let i = 0; i < rects.length; i++) {
+  //     for (let j = i + 1; j < rects.length; j++) {
+  //       if (intersect(rects[i].rect, rects[j].rect)) {
+  //        console.log(`Sprites ${rects[i].id} and ${rects[j].id} are intersecting!`);
+  //        const pair = [rects[i].id, rects[j].id].sort().join(",");
+  //        if (!uniquePairsSet.has(pair)) {
+  //         collidedPairs.current.push([rects[i].id, rects[j].id]);
+  //         uniquePairsSet.add(pair); // Mark this pair as recorded
+  //         console.log(collidedPairs.current, "collidedPairs")
+  //       }
+  //       }
+  //     }
+  //   }
+
+  //   collidedPairs.current.forEach(([spriteId1, spriteId2]) => {
+  //     console.log(`Processing collided sprites ${spriteId1} and ${spriteId2}`);
+  //     const sprite1 = spriteStore.find((s) => s.id == spriteId1);
+  //     const sprite2 = spriteStore.find((s) => s.id == spriteId2);
+  //     console.log(spriteStore, "spriteStore")
+  // console.log(sprite1, sprite2, "sprite1, sprite2") 
+  //     // Check if both sprites are not playing
+  //     if (sprite1 && sprite2 && !sprite1.isPlaying && !sprite2.isPlaying) {
+  //       // Exchange motions
+  //       console.log(`Exchanging motions of sprites ${sprite1.id} and ${sprite2.id}`);
+  //       const tempMotions = sprite1.motions;
+  //       sprite1.motions = sprite2.motions;
+  //       sprite2.motions = tempMotions;
+  
+  //       // Update the spriteStore
+  //       setSpriteStore((prevStore) =>
+  //         prevStore.map((s) => (s.id === sprite1.id || s.id === sprite2.id ? { ...s } : s))
+  //       );
+  //     }
+  //   });
+  
+  //   // Clear the collidedPairs after processing
+  //  // collidedPairs.current = [];
+    
+  // };
+
+  // useEffect(() => {
+  //   if(collidedPairs.current.length>0){
+  //     checkIntersections();
+  //   }
+  // }, [spriteStore, collidedPairs]);
+
+  const checkIntersections = () => {
+
+    const sprites = spriteStore.map((sprite) => {
+      const element = document.getElementById(`sprite-${sprite.id}`);
+      return { ...sprite, element };
+    });
+
+    // Check collisions between sprites
+    for (let i = 0; i < sprites.length; i++) {
+      for (let j = i + 1; j < sprites.length; j++) {
+        if(sprites[i].isPlaying || sprites[j].isPlaying) continue;
+       // if(sprites[i].isCollided || sprites[j].isCollided) continue;
+        const collisionDetected = checkCollision(
+          sprites[i].element.getBoundingClientRect(),
+          sprites[j].element.getBoundingClientRect()
+        );
+
+        if(!collisionDetected && sprites[i].isCollided && sprites[j].isCollided) {
+          sprites[i].isCollided = false;
+          sprites[j].isCollided = false;
+
+          setSpriteStore(prevStore => {
+            return prevStore.map(sprite => {
+              if(sprite.id === sprites[i].id) {
+                return { ...sprite, isCollided: false };
+              }
+              if(sprite.id === sprites[j].id) {
+                return { ...sprite, isCollided: false };
+              }
+              return sprite;
+              //const updatedSprite = sprites.find(s => s.id === sprite.id);
+              //return updatedSprite ? { ...sprite, motions: updatedSprite.motions, isCollided: updatedSprite.isCollided } : sprite;
+            });
+          });
+        }
+
+        // Handle collision logic
+        if (collisionDetected) {
+          console.log(`Sprites ${sprites[i].id} and ${sprites[j].id} are colliding!`);
+          // If they collide and were not previously marked as collided
+          if (!sprites[i].isCollided && !sprites[j].isCollided) {
+            // Exchange motions
+            const tempMotions = sprites[i].motions;
+            sprites[i].motions = sprites[j].motions;
+            sprites[j].motions = tempMotions;
+
+            // Set collided status to true
+            sprites[i].isCollided = true;
+            sprites[j].isCollided = true;
+          }
+        } else {
+          // If they are not colliding, reset their collided state
+          if (sprites[i].isCollided || sprites[j].isCollided) {
+            sprites[i].isCollided = false;
+            sprites[j].isCollided = false;
+          }
+        }
+      }
+    }
+
+    // Update the spriteStore after processing collisions
+    // startTransition(() => {
+    setSpriteStore(prevStore => {
+      return prevStore.map(sprite => {
+        const updatedSprite = sprites.find(s => s.id === sprite.id);
+        return updatedSprite ? { ...sprite, motions: updatedSprite.motions, isCollided: updatedSprite.isCollided } : sprite;
+      });
+    });
+  // })
+  };
+
   useEffect(() => {
-    checkIntersections(); // Check for intersections whenever sprite positions change
+    // if(!currentSprite.isPlaying)
+    //   checkIntersections();
+     //checkIntersections()
+     const interval = setInterval(checkIntersections, 500); // Check for collisions every 100 ms
+     return () => clearInterval(interval);
   }, [spriteStore]);
+  
+  // const intersect = (rectA, rectB) => {
+  //   return !(
+  //     rectA.right < rectB.left ||
+  //     rectA.left > rectB.right ||
+  //     rectA.bottom < rectB.top ||
+  //     rectA.top > rectB.bottom
+  //   );
+  // };
+
+  // useEffect(() => {
+  //   checkIntersections(); // Check for intersections whenever sprite positions change
+  // }, [spriteStore]);
 
   const handlePlay = () => {
     setSpriteStore((prevStore) => {
@@ -60,15 +189,7 @@ function App() {
       return updatedStore;
     });
   };
-  useEffect(()=>{
-    console.log(currentSprite, 'currentSprite')
-  }, [currentSprite])
-useEffect(()=>{
-  console.log(spriteStore, 'spriteStore')
-}, [spriteStore])
-  // useEffect(() => {
-  //   setCurrentSprite(spriteStore[spriteStore.length - 1]);
-  // }, [spriteStore.length]);
+ 
 
   const fileInputRef = useRef(null);
   const handleFileUpload = (event) => {
@@ -83,6 +204,8 @@ useEffect(()=>{
             src: reader.result,
             motions: [],
             currentPosition: { x: 0, y: 0, degree: 0 },
+            isPlaying: false,
+            isCollided: false
           }
           const updatedStore=[
           ...prevStore,

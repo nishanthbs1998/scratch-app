@@ -41,7 +41,7 @@ const Sprite=({sprite, spriteStore, setSpriteStore, spriteRefs})=>{
         }
         for (const action of actions) {
           console.log(action, "action")
-           action();
+          await action();
         }
       }
 
@@ -52,7 +52,7 @@ const Sprite=({sprite, spriteStore, setSpriteStore, spriteRefs})=>{
         if(sprite.isPlaying){
             playSprite();
         }
-       // playSprite();
+        // playSprite();
 
     },[sprite.isPlaying])
 

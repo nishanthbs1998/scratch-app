@@ -146,7 +146,7 @@ const Sprite = ({ sprite, setSpriteStore, spriteRefs }) => {
         dragMomentum={false}
         src={sprite.src}
         alt={sprite.name}
-        className="absolute w-20 h-20 object-cover"
+        className="absolute object-cover"
       />
     </div>
   );

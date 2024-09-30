@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { motion as framerMotion } from "framer-motion";
+
 const Workspace = ({
   motions,
   setSpriteStore,
@@ -83,12 +82,8 @@ const Workspace = ({
         handleDrop(JSON.parse(e.dataTransfer.getData("text/plain")));
       }}
       onDragOver={(e) => e.preventDefault()}
-      className="bg-blue-400 w-1/2 h-1/2 flex flex-col items-center"
-    >
-      Motion stack
-      {/* <div>
-        {renderMotions(motions)}
-      </div> */}
+      className="h-1/2 flex flex-col items-center"
+    > 
       <div>
         {motions?.map((motion, index) => (
           <div

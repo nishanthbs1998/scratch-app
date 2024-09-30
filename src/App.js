@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import Workspace from "./components/Workspace";
 import Sprite from "./components/Sprite";
-
+import sprite1 from "./assets/sprite1.svg";
+import trashCan from "./assets/trash-can.png";
 function App() {
   const [draggedItemId, setDraggedItemId] = useState(null);
   const [spriteStore, setSpriteStore] = useState([
     {
       id: 1,
       name: "sprite_1",
-      src: "https://via.placeholder.com/100x100.png?text=Sprite+1",
+      src: sprite1,
       currentPosition: { x: 100, y: 100, degree: 0 },
       motions: [],
       isPlaying: false,
@@ -146,6 +147,10 @@ function App() {
     fileInputRef.current.click();
   };
 
+  const handleDeleteSprite = (id) => () => {
+    setSpriteStore((prevStore) => prevStore.filter((sprite) => sprite.id !== id));
+  }
+
   const handleDeleteMotion = (id) => {
     setSpriteStore((prevStore) => {
       const updatedStore = prevStore.map((sprite) => {
@@ -173,9 +178,9 @@ function App() {
       <button className="bg-blue-400" onClick={handlePlay}>
         Play
       </button>
-      <div className="bg-black flex gap-5 h-screen">
+      <div className="bg-[#E6F0FF] flex gap-2 h-screen">
         <div
-          className="bg-blue-400 w-1/2"
+          className="bg-white w-1/4 rounded-r-lg border"
           onDragEnter={() => handleDeleteMotion(draggedItemId)}
         >
           <div
@@ -272,15 +277,16 @@ function App() {
             />
           </div>
         </div>
-
+        <div className="w-1/3 bg-white rounded-lg">
         <Workspace
           setDraggedItemId={setDraggedItemId}
           motions={currentSprite?.motions}
           currentSprite={currentSprite}
           setSpriteStore={setSpriteStore}
         />
-        <div className="flex flex-col w-1/2  h-screen">
-          <div className="bg-white relative overflow-hidden h-1/2">
+        </div>
+        <div className="flex flex-col w-2/5 mr-2 h-screen">
+          <div className="bg-white relative rounded-lg overflow-hidden h-2/3">
             {spriteStore?.map((sprite) => (
               <Sprite
                 key={sprite.id}
@@ -290,28 +296,41 @@ function App() {
               />
             ))}
           </div>
-          <div className="bg-white">
-            currentX: {Math.trunc(currentSprite.currentPosition.x)}
-            currentY: {Math.trunc(currentSprite.currentPosition.y)}
-            degree: {Math.trunc(currentSprite.currentPosition.degree)}
-          </div>
-          <div className="flex gap-2 mt-4">
+          <div className="bg-white flex border border shadow-lg flex-col gap-3 mt-2 h-1/3 rounded-lg">
+            <div className="flex gap-5 items-center px-2">
+           <span>x: {Math.trunc(currentSprite.currentPosition.x)}</span> 
+           <span>y: {Math.trunc(currentSprite.currentPosition.y)}</span> 
+            <span>Direction: {Math.trunc(currentSprite.currentPosition.degree)}</span>
+            </div>
+            <div className="flex flex-col">
+            <div className="flex p-2 gap-4 overflow-x-scroll bg-[#E6F0FF]">
             {spriteStore?.map((sprite) => (
               <div
                 key={sprite.id}
-                className="cursor-pointer"
+                className={`cursor-pointer relative flex flex-col rounded-lg w-20 h-auto shadow-[#855CD6] ${sprite.id===currentSprite.id ? 'border-4 border-[#855CD6] bg-white' : 'bg-[#E9F1FC] border-2 border-slate-400'}` }
                 onClick={() => setCurrentSprite(sprite)}
               >
+{           currentSprite.id===sprite.id && 
+                <div 
+                onClick={handleDeleteSprite(sprite.id)}
+                className="flex rounded-full bg-[#855CD6] p-2 absolute -top-3 -right-4 self-end">
+                <img
+                  src={trashCan}
+                  alt={'delete icon'}
+                 
+                />
+                </div> }
                 <img
                   src={sprite.src}
                   alt={sprite.name}
-                  className="w-20 h-20 object-cover"
+                  className="w-10 h-10 my-2 mx-4"
                 />
-                <p className="text-center">{sprite.name}</p>
+                <p className={`text-center overflow-hidden ${sprite.id===currentSprite.id?'bg-[#855CD6] text-white':'text-black'}`}>{sprite.name}</p>
               </div>
             ))}
           </div>
-          <div className="bg-yellow-400">
+          <div className="p-2 flex justify-end bg-[#E6F0FF]">
+          <div className="bg-yellow-200 p-1 rounded-md">
             <button onClick={handleUploadClick}>add sprite</button>
             <input
               type="file"
@@ -319,7 +338,16 @@ function App() {
               className="hidden"
               onChange={handleFileUpload}
             />
+            </div>
           </div>
+            </div>
+            
+
+        
+
+          </div>
+          
+
         </div>
       </div>
     </div>

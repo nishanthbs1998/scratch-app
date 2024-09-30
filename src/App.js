@@ -148,8 +148,10 @@ function App() {
   };
 
   const handleDeleteSprite = (id) => () => {
-    setSpriteStore((prevStore) => prevStore.filter((sprite) => sprite.id !== id));
-  }
+    setSpriteStore((prevStore) =>
+      prevStore.filter((sprite) => sprite.id !== id)
+    );
+  };
 
   const handleDeleteMotion = (id) => {
     setSpriteStore((prevStore) => {
@@ -174,16 +176,22 @@ function App() {
   }, [spriteStore]);
 
   return (
-    <div className="flex flex-col gap-2">
-      <button className="bg-blue-400" onClick={handlePlay}>
+    <div className="flex flex-col bg-[#E6F0FF] gap-2">
+      <button
+        className="bg-[#4CBF56] rounded flex self-end mr-2 py-1 px-4 text-white mt-1"
+        onClick={handlePlay}
+      >
         Play
       </button>
+
       <div className="bg-[#E6F0FF] flex gap-2 h-screen">
         <div
           className="bg-white w-1/4 rounded-r-lg border"
           onDragEnter={() => handleDeleteMotion(draggedItemId)}
         >
+          <p className="m-2 font-semibold text-slate-600">Motion</p>
           <div
+            className="flex gap-2 bg-[#4C97FF] p-2 w-2/3 m-2 rounded items-center"
             draggable
             onDragStart={(e) =>
               e.dataTransfer.setData(
@@ -192,36 +200,40 @@ function App() {
               )
             }
           >
-            move x
+            <span className="text-white">move</span>
             <input
               type="text"
+              className="w-3/12 h-5 rounded-full p-2"
               value={move}
               onChange={(e) => setMove(e.target.value)}
             />
+            <span className=" text-white">steps</span>
           </div>
           <div
-            className="mt-2"
+            className="flex gap-2 bg-[#4C97FF] p-2 w-2/3 m-2 rounded items-center"
             draggable
             onDragStart={(e) =>
               e.dataTransfer.setData(
                 "text/plain",
                 JSON.stringify({
                   id: Date.now(),
-                  type: "rotate",
+                  type: "turn",
                   value: rotate,
                 })
               )
             }
           >
-            rotate
+            <span className="text-white">turn</span>
             <input
+              className="w-3/12 h-5 rounded-full p-2"
               type="text"
               value={rotate}
               onChange={(e) => setRotate(e.target.value)}
             />
+            <span className="text-white">degrees</span>
           </div>
           <div
-            className="mt-2"
+            className="flex gap-2 bg-[#4C97FF] p-2 w-2/3 m-2 rounded items-center"
             draggable
             onDragStart={(e) =>
               e.dataTransfer.setData(
@@ -230,9 +242,9 @@ function App() {
               )
             }
           >
-            goto x
+           <span className="text-white">go to x:</span> 
             <input
-              className="w-1/12"
+              className="w-3/12 h-5 rounded-full p-2"
               type="text"
               value={goto.x}
               onChange={(e) =>
@@ -242,9 +254,9 @@ function App() {
                 }))
               }
             />
-            y
+           <span className="text-white">y:</span> 
             <input
-              className="w-1/12"
+              className="w-3/12 h-5 rounded-full p-2"
               type="text"
               value={goto.y}
               onChange={(e) =>
@@ -255,8 +267,9 @@ function App() {
               }
             />
           </div>
+          <p className="m-2 font-semibold text-slate-600 mt-5">Control</p>
           <div
-            className="mt-2"
+            className="flex gap-2 bg-[#FFAB19] p-2 w-2/3 m-2 rounded items-center"
             draggable
             onDragStart={(e) =>
               e.dataTransfer.setData(
@@ -269,23 +282,25 @@ function App() {
               )
             }
           >
-            repeat
+            <span className="text-white">repeat</span>
             <input
+            className="w-3/12 h-5 rounded-full p-2"
               type="text"
               value={repeat}
               onChange={(e) => setRepeat(e.target.value)}
             />
+            <span className="text-white">times</span>
           </div>
         </div>
         <div className="w-1/3 bg-white rounded-lg">
-        <Workspace
-          setDraggedItemId={setDraggedItemId}
-          motions={currentSprite?.motions}
-          currentSprite={currentSprite}
-          setSpriteStore={setSpriteStore}
-        />
+          <Workspace
+            setDraggedItemId={setDraggedItemId}
+            motions={currentSprite?.motions}
+            currentSprite={currentSprite}
+            setSpriteStore={setSpriteStore}
+          />
         </div>
-        <div className="flex flex-col w-2/5 mr-2 h-screen">
+        <div className="flex flex-col w-2/5 mr-2">
           <div className="bg-white relative rounded-lg overflow-hidden h-2/3">
             {spriteStore?.map((sprite) => (
               <Sprite
@@ -296,58 +311,64 @@ function App() {
               />
             ))}
           </div>
-          <div className="bg-white flex border border shadow-lg flex-col gap-3 mt-2 h-1/3 rounded-lg">
-            <div className="flex gap-5 items-center px-2">
-           <span>x: {Math.trunc(currentSprite.currentPosition.x)}</span> 
-           <span>y: {Math.trunc(currentSprite.currentPosition.y)}</span> 
-            <span>Direction: {Math.trunc(currentSprite.currentPosition.degree)}</span>
+          <div className="bg-white flex border border shadow-lg flex-col mt-2 h-1/5 rounded-lg">
+            <div className="flex gap-10 items-center justify-center p-1">
+              <span>X: {Math.trunc(currentSprite.currentPosition.x)}</span>
+              <span>Y: {Math.trunc(currentSprite.currentPosition.y)}</span>
+              <span>
+                Direction: {Math.trunc(currentSprite.currentPosition.degree)}
+              </span>
             </div>
             <div className="flex flex-col">
-            <div className="flex p-2 gap-4 overflow-x-scroll bg-[#E6F0FF]">
-            {spriteStore?.map((sprite) => (
-              <div
-                key={sprite.id}
-                className={`cursor-pointer relative flex flex-col rounded-lg w-20 h-auto shadow-[#855CD6] ${sprite.id===currentSprite.id ? 'border-4 border-[#855CD6] bg-white' : 'bg-[#E9F1FC] border-2 border-slate-400'}` }
-                onClick={() => setCurrentSprite(sprite)}
-              >
-{           currentSprite.id===sprite.id && 
-                <div 
-                onClick={handleDeleteSprite(sprite.id)}
-                className="flex rounded-full bg-[#855CD6] p-2 absolute -top-3 -right-4 self-end">
-                <img
-                  src={trashCan}
-                  alt={'delete icon'}
-                 
-                />
-                </div> }
-                <img
-                  src={sprite.src}
-                  alt={sprite.name}
-                  className="w-10 h-10 my-2 mx-4"
-                />
-                <p className={`text-center overflow-hidden ${sprite.id===currentSprite.id?'bg-[#855CD6] text-white':'text-black'}`}>{sprite.name}</p>
+              <div className="flex p-2 gap-4 overflow-x-scroll bg-[#E6F0FF]">
+                {spriteStore?.map((sprite) => (
+                  <div
+                    key={sprite.id}
+                    className={`cursor-pointer relative flex flex-col rounded-lg w-20 h-auto shadow-[#855CD6] ${
+                      sprite.id === currentSprite.id
+                        ? "border-4 border-[#855CD6] bg-white"
+                        : "bg-[#E9F1FC] border-2 border-slate-400"
+                    }`}
+                    onClick={() => setCurrentSprite(sprite)}
+                  >
+                    {currentSprite.id === sprite.id && (
+                      <div
+                        onClick={handleDeleteSprite(sprite.id)}
+                        className="flex rounded-full bg-[#855CD6] p-2 absolute -top-3 -right-4 self-end"
+                      >
+                        <img src={trashCan} alt={"delete icon"} />
+                      </div>
+                    )}
+                    <img
+                      src={sprite.src}
+                      alt={sprite.name}
+                      className="w-10 h-10 my-2 mx-4"
+                    />
+                    <p
+                      className={`text-center overflow-hidden ${
+                        sprite.id === currentSprite.id
+                          ? "bg-[#855CD6] text-white"
+                          : "text-black"
+                      }`}
+                    >
+                      {sprite.name}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="p-2 flex justify-end bg-[#E6F0FF]">
-          <div className="bg-yellow-200 p-1 rounded-md">
-            <button onClick={handleUploadClick}>add sprite</button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleFileUpload}
-            />
+              <div className="p-2 flex justify-end bg-[#E6F0FF]">
+                <div className="bg-yellow-200 p-1 rounded-md">
+                  <button onClick={handleUploadClick}>add sprite</button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                </div>
+              </div>
             </div>
           </div>
-            </div>
-            
-
-        
-
-          </div>
-          
-
         </div>
       </div>
     </div>

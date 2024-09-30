@@ -19,7 +19,7 @@ const Sprite = ({ sprite, setSpriteStore, spriteRefs }) => {
       const motion = sprite.motions[i];
       if (motion.type === "move") {
         actions.push(() => animateMove(motion.value));
-      } else if (motion.type === "rotate") {
+      } else if (motion.type === "turn") {
         actions.push(() => animateRotate(motion.value));
       } else if (motion.type === "goto") {
         actions.push(() => animateGoto(motion.value));
@@ -79,8 +79,8 @@ const Sprite = ({ sprite, setSpriteStore, spriteRefs }) => {
 
   const animateGoto = (value) => {
     return new Promise((resolve) => {
-      xRef.current = Number(value.x);
-      yRef.current = Number(value.y);
+      xRef.current += Number(value.x);
+      yRef.current += Number(value.y);
       setTimeout(resolve, 500);
     });
   };

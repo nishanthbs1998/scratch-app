@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import Workspace from "./components/Workspace.tsx";
-import Sprite from "./components/Sprite.tsx";
+import Workspace from "./components/Workspace";
+import Sprite from "./components/Sprite";
 import sprite1 from "./assets/sprite1.svg";
 import trashCan from "./assets/trash-can.png";
 
